@@ -97,6 +97,12 @@ public class TemplateServiceImpl : TemplateService.TemplateServiceBase
             throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid template ID format"));
         }
 
+        var template = await _templateRepository.GetByIdAsync(id);
+        if (template == null)
+        {
+            throw new RpcException(new Status(StatusCode.NotFound, "Template not found"));
+        }
+
         await _templateRepository.DeleteAsync(id);
 
         return new DeleteTemplateResponse

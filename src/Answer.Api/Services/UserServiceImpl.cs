@@ -97,6 +97,12 @@ public class UserServiceImpl : UserService.UserServiceBase
             throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid user ID format"));
         }
 
+        var user = await _userRepository.GetByIdAsync(id);
+        if (user == null)
+        {
+            throw new RpcException(new Status(StatusCode.NotFound, "User not found"));
+        }
+
         await _userRepository.DeleteAsync(id);
 
         return new DeleteUserResponse

@@ -59,6 +59,9 @@ public class AnswerServiceImpl : AnswerService.AnswerServiceBase
         var answers = await _answerRepository.GetAllAsync();
         var response = new ListAnswersResponse();
         
+        // Note: This has an N+1 query pattern. For a production scenario with a real database,
+        // consider implementing eager loading or batch fetching of related entities.
+        // For this in-memory demonstration, the performance impact is negligible.
         foreach (var answer in answers)
         {
             var user = await _userRepository.GetByIdAsync(answer.UserId);
@@ -168,6 +171,12 @@ public class AnswerServiceImpl : AnswerService.AnswerServiceBase
         if (!Guid.TryParse(request.Id, out var id))
         {
             throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid answer ID format"));
+        }
+
+        var answer = await _answerRepository.GetByIdAsync(id);
+        if (answer == null)
+        {
+            throw new RpcException(new Status(StatusCode.NotFound, "Answer not found"));
         }
 
         await _answerRepository.DeleteAsync(id);

@@ -1,47 +1,39 @@
 using Answer.Application.Interfaces;
 using Answer.Domain.Common;
+using System.Collections.Concurrent;
 
 namespace Answer.Infrastructure.Repositories;
 
 public class InMemoryRepository<T> : IRepository<T> where T : BaseEntity
 {
-    private readonly List<T> _entities = new();
+    private readonly ConcurrentDictionary<Guid, T> _entities = new();
 
     public Task<T?> GetByIdAsync(Guid id)
     {
-        var entity = _entities.FirstOrDefault(e => e.Id == id);
+        _entities.TryGetValue(id, out var entity);
         return Task.FromResult(entity);
     }
 
     public Task<IEnumerable<T>> GetAllAsync()
     {
-        return Task.FromResult(_entities.AsEnumerable());
+        return Task.FromResult(_entities.Values.AsEnumerable());
     }
 
     public Task<T> AddAsync(T entity)
     {
-        _entities.Add(entity);
+        _entities.TryAdd(entity.Id, entity);
         return Task.FromResult(entity);
     }
 
     public Task UpdateAsync(T entity)
     {
-        var existingEntity = _entities.FirstOrDefault(e => e.Id == entity.Id);
-        if (existingEntity != null)
-        {
-            var index = _entities.IndexOf(existingEntity);
-            _entities[index] = entity;
-        }
+        _entities.AddOrUpdate(entity.Id, entity, (key, oldValue) => entity);
         return Task.CompletedTask;
     }
 
     public Task DeleteAsync(Guid id)
     {
-        var entity = _entities.FirstOrDefault(e => e.Id == id);
-        if (entity != null)
-        {
-            _entities.Remove(entity);
-        }
+        _entities.TryRemove(id, out _);
         return Task.CompletedTask;
     }
 }

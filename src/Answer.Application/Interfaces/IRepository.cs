@@ -1,8 +1,8 @@
-using Answer.Domain.Entities;
+using Answer.Domain.Common;
 
 namespace Answer.Application.Interfaces;
 
-public interface IRepository<T> where T : class
+public interface IRepository<T> where T : BaseEntity
 {
     Task<T?> GetByIdAsync(Guid id);
     Task<IEnumerable<T>> GetAllAsync();

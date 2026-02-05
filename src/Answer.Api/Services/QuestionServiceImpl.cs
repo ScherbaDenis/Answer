@@ -97,6 +97,12 @@ public class QuestionServiceImpl : QuestionService.QuestionServiceBase
             throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid question ID format"));
         }
 
+        var question = await _questionRepository.GetByIdAsync(id);
+        if (question == null)
+        {
+            throw new RpcException(new Status(StatusCode.NotFound, "Question not found"));
+        }
+
         await _questionRepository.DeleteAsync(id);
 
         return new DeleteQuestionResponse
