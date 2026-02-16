@@ -32,3 +32,6 @@ if (app.Environment.IsDevelopment())
 app.MapGet("/", () => "Answer API - gRPC with REST support");
 
 app.Run();
+
+// Make the Program class accessible to integration tests
+public partial class Program { }
