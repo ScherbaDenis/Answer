@@ -38,7 +38,36 @@ This project follows Microsoft Clean Architecture principles with the following 
 - .NET 9.0
 - gRPC with ASP.NET Core
 - gRPC-JSON Transcoding for REST support
-- In-memory data storage (for demonstration)
+- Entity Framework Core 9.0
+- SQL Server support (with in-memory option for development)
+
+## Data Storage Options
+
+The application supports two data storage options:
+
+### 1. In-Memory Storage (Default)
+For development and testing, the application uses in-memory storage by default. No database setup is required.
+
+### 2. SQL Server Storage
+For production environments, the application can use SQL Server. To enable SQL Server:
+
+1. Update `appsettings.json` or set environment variables:
+   ```json
+   {
+     "UseInMemoryDatabase": false,
+     "ConnectionStrings": {
+       "DefaultConnection": "Server=localhost;Database=AnswerDb;User Id=sa;Password=YourPassword;TrustServerCertificate=True"
+     }
+   }
+   ```
+
+2. Run database migrations to create the schema:
+   ```bash
+   cd src/Answer.Infrastructure
+   dotnet ef database update --startup-project ../Answer.Api/Answer.Api.csproj
+   ```
+
+The application automatically selects the appropriate repository implementation based on the `UseInMemoryDatabase` configuration setting.
 
 ## Building and Running
 
@@ -143,3 +172,52 @@ The Answer entity supports the following types:
 - `POSITIVE_INTEGER` - Positive integer numbers
 - `CHECKBOX` - Checkbox value (true/false as string)
 - `BOOLEAN` - Boolean value (true/false as string)
+## Database Management
+
+### Migrations
+
+The project uses Entity Framework Core migrations for database schema management.
+
+#### Create a New Migration
+```bash
+cd src/Answer.Infrastructure
+dotnet ef migrations add <MigrationName> --startup-project ../Answer.Api/Answer.Api.csproj
+```
+
+#### Apply Migrations to Database
+```bash
+cd src/Answer.Infrastructure
+dotnet ef database update --startup-project ../Answer.Api/Answer.Api.csproj
+```
+
+#### Remove Last Migration (if not applied)
+```bash
+cd src/Answer.Infrastructure
+dotnet ef migrations remove --startup-project ../Answer.Api/Answer.Api.csproj
+```
+
+### Database Schema
+
+The database includes the following tables:
+
+- **Users**: Stores user information
+  - `Id` (uniqueidentifier, PK)
+  - `Name` (nvarchar(200), required)
+
+- **Questions**: Stores questions
+  - `Id` (uniqueidentifier, PK)
+  - `Title` (nvarchar(500), required)
+
+- **Templates**: Stores answer templates
+  - `Id` (uniqueidentifier, PK)
+  - `Title` (nvarchar(200), required)
+
+- **Answers**: Stores answers with relationships
+  - `Id` (uniqueidentifier, PK)
+  - `UserId` (uniqueidentifier, FK to Users)
+  - `QuestionId` (uniqueidentifier, FK to Questions)
+  - `TemplateId` (uniqueidentifier, FK to Templates)
+  - `AnswerType` (int, enum)
+  - `AnswerValue` (nvarchar(4000), required)
+
+All foreign key relationships use `RESTRICT` delete behavior to maintain referential integrity.
