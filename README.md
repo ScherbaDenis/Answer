@@ -221,3 +221,52 @@ The database includes the following tables:
   - `AnswerValue` (nvarchar(4000), required)
 
 All foreign key relationships use `RESTRICT` delete behavior to maintain referential integrity.
+
+## Testing
+
+The project includes comprehensive testing at multiple levels:
+
+### Test Suite Summary
+
+- **Unit Tests**: 30+ tests covering domain entities and repositories
+- **Integration Tests**: 6+ tests covering API endpoints
+- **Postman Tests**: 21+ API tests with automated assertions
+
+### Running Tests
+
+**All Tests:**
+```bash
+dotnet test
+```
+
+**Unit Tests Only:**
+```bash
+dotnet test tests/Answer.Domain.Tests/
+dotnet test tests/Answer.Infrastructure.Tests/
+```
+
+**Integration Tests:**
+```bash
+dotnet test tests/Answer.Api.IntegrationTests/
+```
+
+**Postman/Newman Tests:**
+```bash
+cd postman
+newman run Answer_API_Tests.postman_collection.json \
+  -e Answer_API_Development.postman_environment.json
+```
+
+### Test Documentation
+
+For detailed testing information, see:
+- **[TESTING.md](TESTING.md)** - Comprehensive testing guide
+- **[postman/README.md](postman/README.md)** - Postman collection usage
+
+### Test Coverage
+
+- Domain entities and business logic
+- Repository implementations (InMemory and SQL Server)
+- API endpoints (REST via gRPC-JSON transcoding)
+- End-to-end workflows
+- Error handling and edge cases
